@@ -1,19 +1,15 @@
 import os
 import re
-import streamlit as st
 import mysql.connector
-import pandas as pd
+import streamlit as st
 
-st.set_page_config(page_title="Survey App", layout="centered")
-
-# --- DB connection ---
 def get_conn():
     DATABASE_URL = os.environ.get("DATABASE_URL")
     if not DATABASE_URL:
         st.error("DATABASE_URL not set.")
         st.stop()
 
-    # Parse MySQL URL with optional ?ssl-mode=REQUIRED
+    # Parse URL
     match = re.match(r"mysql://(.*?):(.*?)@(.*?):(\d+)/(.*?)(\?.*)?$", DATABASE_URL)
     user, password, host, port, database, _ = match.groups()
 
@@ -23,9 +19,13 @@ def get_conn():
         password=password,
         database=database,
         port=int(port),
-        ssl_verify_cert=True  # required for Aiven SSL
+        ssl_verify_cert=True
     )
     return conn
+
+    except mysql.connector.Error as e:
+        st.error(f"Error connecting to database: {e}")
+        st.stop()
 
 # --- Ensure table exists ---
 def ensure_table():
