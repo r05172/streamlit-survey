@@ -9,23 +9,24 @@ def get_conn():
         st.error("DATABASE_URL not set.")
         st.stop()
 
-    # Parse URL
+    import re
     match = re.match(r"mysql://(.*?):(.*?)@(.*?):(\d+)/(.*?)(\?.*)?$", DATABASE_URL)
     user, password, host, port, database, _ = match.groups()
 
-    conn = mysql.connector.connect(
-        host=host,
-        user=user,
-        password=password,
-        database=database,
-        port=int(port),
-        ssl_verify_cert=True
-    )
-    return conn
-
+    try:
+        conn = mysql.connector.connect(
+            host=host,
+            user=user,
+            password=password,
+            database=database,
+            port=int(port),
+            ssl_verify_cert=True
+        )
+        return conn
     except mysql.connector.Error as e:
         st.error(f"Error connecting to database: {e}")
         st.stop()
+
 
 # --- Ensure table exists ---
 def ensure_table():
